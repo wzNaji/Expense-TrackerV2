@@ -17,8 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -73,7 +73,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5500")); // Allow your specific origin
         configuration.setAllowedMethods(Collections.singletonList("*")); // Allow any HTTP methods
         configuration.setAllowedHeaders(Collections.singletonList("*")); // Allow any headers
-        configuration.setExposedHeaders(Arrays.asList("Authorization")); // Expose the Authorization header
+        configuration.setExposedHeaders(List.of("Authorization")); // Expose the Authorization header
         configuration.setAllowCredentials(true); // Allow credentials
         configuration.setMaxAge(3600L); // Cache preflight response for 1 hour (Put,Delete, non-simple reqs.)
 
