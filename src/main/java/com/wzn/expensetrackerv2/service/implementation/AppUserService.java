@@ -1,6 +1,6 @@
-package com.wzn.expensetrackerv2.service;
+package com.wzn.expensetrackerv2.service.implementation;
 
-import com.wzn.expensetrackerv2.config.repository.AppUserRepository;
+import com.wzn.expensetrackerv2.repository.AppUserRepository;
 import com.wzn.expensetrackerv2.entity.AppUser;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,8 +18,8 @@ public class AppUserService implements UserDetailsService {
         // Initialize the user if not present. Brug pass generator til eget pwd.
         if (appUserRepository.count() == 0) {
             AppUser appUser = new AppUser();
-            appUser.setUsername("shopowner");
-            appUser.setPassword(new BCryptPasswordEncoder().encode("securepassword"));
+            appUser.setUsername(System.getenv("USERNAME"));
+            appUser.setPassword(new BCryptPasswordEncoder().encode(System.getenv("USERPWD")));
             appUserRepository.save(appUser);
         }
     }

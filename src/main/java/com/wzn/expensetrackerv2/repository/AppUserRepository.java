@@ -1,4 +1,4 @@
-package com.wzn.expensetrackerv2.config.repository;
+package com.wzn.expensetrackerv2.repository;
 
 import com.wzn.expensetrackerv2.entity.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
