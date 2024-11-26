@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MonthService {
 
-    void createMonth(Month month);
+    Month createMonth(Month month);
     boolean deleteMonth(Long id);
     Month findMonthById(Long id);
     List<Month> findAllMonths();

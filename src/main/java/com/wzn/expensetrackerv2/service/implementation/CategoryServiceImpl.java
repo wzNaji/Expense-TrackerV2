@@ -1,7 +1,6 @@
 package com.wzn.expensetrackerv2.service.implementation;
 
 import com.wzn.expensetrackerv2.entity.Category;
-import com.wzn.expensetrackerv2.entity.Item;
 import com.wzn.expensetrackerv2.repository.CategoryRepository;
 import com.wzn.expensetrackerv2.service.CategoryService;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void createCategory(Category category) {
+    public Category createCategory(Category category) {
         if (category == null) {
             throw new IllegalArgumentException("'Category' was not found");
         }
@@ -29,6 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong. 'Category' was not saved");
         }
+        return category;
     }
 
     @Override

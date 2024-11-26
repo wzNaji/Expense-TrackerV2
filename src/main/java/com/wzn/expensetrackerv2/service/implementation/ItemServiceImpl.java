@@ -19,7 +19,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public void createItem(Item item) {
+    public Item createItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException("'Item' was not found");
         }
@@ -28,6 +28,7 @@ public class ItemServiceImpl implements ItemService {
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong. 'Item' was not saved");
         }
+        return item;
     }
 
     @Override

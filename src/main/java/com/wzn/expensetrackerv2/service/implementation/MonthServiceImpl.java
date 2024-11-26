@@ -21,7 +21,7 @@ public class MonthServiceImpl implements MonthService {
 
     @Override
     @Transactional
-    public void createMonth(Month month) {
+    public Month createMonth(Month month) {
         if (month == null) {
             throw new IllegalArgumentException("'Month' was not found");
         }
@@ -30,7 +30,7 @@ public class MonthServiceImpl implements MonthService {
             } catch (Exception e) {
                 throw new RuntimeException("Something went wrong. 'Month' was not saved");
             }
-
+            return month;
     }
 
     @Override

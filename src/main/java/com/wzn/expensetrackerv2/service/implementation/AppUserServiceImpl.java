@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service
-public class AppUserService implements UserDetailsService {
+public class AppUserServiceImpl implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
 
-    public AppUserService(AppUserRepository appUserRepository) {
+    public AppUserServiceImpl(AppUserRepository appUserRepository) {
         this.appUserRepository = appUserRepository;
 
         // Initialize the user if not present.
