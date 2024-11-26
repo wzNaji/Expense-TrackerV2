@@ -34,9 +34,9 @@ public class Expense {
     @OneToOne
     private Category category;
 
-    @OneToOne
-    @JoinColumn(name = "month_id", nullable = false)
-    private Month month_id;
+    @ManyToOne
+    @JoinColumn(name = "month_id", nullable = true)
+    private Month month;
 
 
 }

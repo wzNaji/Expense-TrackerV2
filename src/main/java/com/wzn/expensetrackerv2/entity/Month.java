@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,5 +24,18 @@ public class Month {
 
     @Column(nullable = false)
     private int month;
+
+    @OneToMany(mappedBy = "month", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> listOfExpenses = new ArrayList<>();
+
+    public void addExpense(Expense expense) {
+        listOfExpenses.add(expense);
+        expense.setMonth(this);
+    }
+
+    public void removeExpense(Expense expense) {
+        listOfExpenses.remove(expense);
+    }
+
 
 }
