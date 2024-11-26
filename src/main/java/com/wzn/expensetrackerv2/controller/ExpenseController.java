@@ -1,6 +1,7 @@
 package com.wzn.expensetrackerv2.controller;
 
 import com.wzn.expensetrackerv2.entity.Expense;
+import com.wzn.expensetrackerv2.entity.Month;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,10 @@ public class ExpenseController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<?> createExpense(@RequestBody Expense expense) {
+    public ResponseEntity<?> createExpense(@RequestBody Month month,
+                                           Expense expense) {
         try {
-            Expense newExpense = expenseService.createExpense(expense);
+            Expense newExpense = expenseService.createExpense(month,expense);
             return ResponseEntity.ok(newExpense);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create expense");
