@@ -15,7 +15,7 @@ public class AppUserService implements UserDetailsService {
     public AppUserService(AppUserRepository appUserRepository) {
         this.appUserRepository = appUserRepository;
 
-        // Initialize the user if not present. Brug pass generator til eget pwd.
+        // Initialize the user if not present.
         if (appUserRepository.count() == 0) {
             AppUser appUser = new AppUser();
             appUser.setUsername(System.getenv("USERNAME"));
