@@ -20,7 +20,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void createCategory(Category category) {
+    public Category createCategory(Category category) {
         if (category == null) {
             throw new IllegalArgumentException("'Category' was not found");
         }
@@ -29,6 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong. 'Category' was not saved");
         }
+        return category;
     }
 
     @Override

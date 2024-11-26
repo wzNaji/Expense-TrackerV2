@@ -22,7 +22,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional
-    public void createExpense(Expense expense) {
+    public Expense createExpense(Expense expense) {
         if (expense == null) {
             throw new IllegalArgumentException("'Expense' was not found");
         }
@@ -31,6 +31,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong. 'Expense' was not saved");
         }
+        return expense;
     }
 
     @Override
