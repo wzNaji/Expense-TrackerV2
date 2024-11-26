@@ -54,10 +54,10 @@ public class ExpenseController {
             return ResponseEntity.ok(expense); // Return 200 OK with the Category
         } catch (IllegalArgumentException ex) {
             // Handle case where the expense is not found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception ex) {
             // Handle generic exceptions
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     @GetMapping("/expenseList")
