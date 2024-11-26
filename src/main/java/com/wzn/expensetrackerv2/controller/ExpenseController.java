@@ -1,8 +1,6 @@
 package com.wzn.expensetrackerv2.controller;
 
-import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
-import com.wzn.expensetrackerv2.service.CategoryService;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;

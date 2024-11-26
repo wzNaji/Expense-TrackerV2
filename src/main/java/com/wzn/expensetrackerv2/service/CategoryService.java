@@ -1,7 +1,6 @@
 package com.wzn.expensetrackerv2.service;
 
 import com.wzn.expensetrackerv2.entity.Category;
-import com.wzn.expensetrackerv2.entity.Item;
 
 import java.util.List;
 

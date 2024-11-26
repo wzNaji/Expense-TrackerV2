@@ -1,7 +1,6 @@
 package com.wzn.expensetrackerv2.service.implementation;
 
 import com.wzn.expensetrackerv2.entity.Category;
-import com.wzn.expensetrackerv2.entity.Item;
 import com.wzn.expensetrackerv2.repository.CategoryRepository;
 import com.wzn.expensetrackerv2.service.CategoryService;
 import org.springframework.stereotype.Service;
