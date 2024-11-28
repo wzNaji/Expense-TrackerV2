@@ -22,15 +22,15 @@ public class Expense {
     @Column(nullable = true)
     private LocalDate date = LocalDate.now();
 
+    @Column
+    private String itemName;
+
     @Column(nullable = true)
     private String description;
 
     @Column(nullable = false)
     private double price;
 
-    @JoinColumn(name = "item_id", nullable = true)
-    @OneToOne
-    private Item item;
 
     @JoinColumn(name = "category_id", nullable = true)
     @OneToOne
