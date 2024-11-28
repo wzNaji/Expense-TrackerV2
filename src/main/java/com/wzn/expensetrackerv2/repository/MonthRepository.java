@@ -4,4 +4,5 @@ import com.wzn.expensetrackerv2.entity.Month;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MonthRepository extends JpaRepository<Month, Long> {
+    Month findByYearAndMonth(int year, int month);
 }

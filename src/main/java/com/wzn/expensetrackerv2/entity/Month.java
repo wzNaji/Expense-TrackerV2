@@ -1,5 +1,6 @@
 package com.wzn.expensetrackerv2.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class Month {
     private int month;
 
     @OneToMany(mappedBy = "month", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // forward part
     private List<Expense> listOfExpenses = new ArrayList<>();
 
     public void addExpense(Expense expense) {

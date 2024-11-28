@@ -35,7 +35,6 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
             try {
                 if (jwtUtil.validateToken(token)) {
                     String username = jwtUtil.extractUsername(token);
-
                     Authentication auth = new UsernamePasswordAuthenticationToken(
                             username, null, Collections.emptyList());
 

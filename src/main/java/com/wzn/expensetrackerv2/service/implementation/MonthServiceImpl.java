@@ -61,5 +61,12 @@ public class MonthServiceImpl implements MonthService {
         return months;
     }
 
+    @Override
+    @Transactional
+    public Month findByYearAndMonth(int year,int month) {
+        Month monthToFind = null;
+        return monthToFind = monthRepository.findByYearAndMonth(year,month);
+    }
+
 
 }
