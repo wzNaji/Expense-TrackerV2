@@ -29,11 +29,15 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            System.err.println("JWT Token has expired: " + e.getMessage());
+            return false;
         } catch (JwtException e) {
-            // Log the exception if needed
+            System.err.println("Invalid JWT Token: " + e.getMessage());
             return false;
         }
     }
+
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()

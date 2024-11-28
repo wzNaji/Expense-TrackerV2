@@ -1,5 +1,7 @@
 package com.wzn.expensetrackerv2.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,8 +19,8 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Column(nullable = true)
+    private LocalDate date = LocalDate.now();
 
     @Column(nullable = true)
     private String description;
@@ -36,6 +38,7 @@ public class Expense {
 
     @ManyToOne
     @JoinColumn(name = "month_id", nullable = true)
+    @JsonBackReference
     private Month month;
 
 

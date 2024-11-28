@@ -11,5 +11,6 @@ public interface MonthService {
     boolean deleteMonth(Long id);
     Month findMonthById(Long id);
     List<Month> findAllMonths();
+    Month findByYearAndMonth(int year, int month);
 
 }
