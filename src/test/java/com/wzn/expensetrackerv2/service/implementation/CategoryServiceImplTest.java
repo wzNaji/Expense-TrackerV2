@@ -77,11 +77,11 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
         // Act
-        Category result = categoryService.findCategoryById(categoryId);
+        Optional<Category> result = categoryService.findCategoryById(categoryId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(categoryId, result.getId());
+        assertEquals(categoryId, result.get().getId());
         verify(categoryRepository, times(1)).findById(categoryId);
     }
 

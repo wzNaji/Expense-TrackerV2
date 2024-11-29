@@ -3,10 +3,12 @@ package com.wzn.expensetrackerv2.service.implementation;
 import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.repository.CategoryRepository;
 import com.wzn.expensetrackerv2.service.CategoryService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -21,41 +23,43 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public Category createCategory(Category category) {
         if (category == null) {
-            throw new IllegalArgumentException("'Category' was not found");
+            throw new IllegalArgumentException("Category cannot be null");
         }
         try {
-            categoryRepository.save(category);
+            return categoryRepository.save(category);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("Failed to save the category due to data integrity issues: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException("Something went wrong. 'Category' was not saved");
+            throw new RuntimeException("An unexpected error occurred while saving the category", e);
         }
-        return category;
     }
 
     @Override
     @Transactional
     public boolean deleteCategory(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            return false; // Instead of throwing an exception, return false indicating failure to find the category.
+        }
         try {
             categoryRepository.deleteById(id);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Could not delete Category with ID " + id, e);
+            throw new RuntimeException("Could not delete Category with ID " + id + ": " + e.getMessage(), e);
         }
     }
 
     @Override
-    public Category findCategoryById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expense with ID " + id + " was not found."));
+    public Optional<Category> findCategoryById(Long id) {
+        return categoryRepository.findById(id); // Use Optional to gracefully handle the absence of a category.
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Category> findAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         if (categories.isEmpty()) {
-            throw new RuntimeException("No categories found");
+            throw new RuntimeException("No categories found"); // Consider returning an empty list or using Optional if appropriate.
         }
         return categories;
     }
-
 }

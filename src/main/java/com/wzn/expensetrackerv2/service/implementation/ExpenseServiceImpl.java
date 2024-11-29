@@ -28,15 +28,9 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional
     public Expense createExpense(Month month, Expense expense) {
-        if (expense == null || month == null) {
-            throw new IllegalArgumentException("'Expense' or 'Month' was not found");
-        }
-        try {
-            expensesRepository.save(expense);
-            month.addExpense(expense);
-        } catch (Exception e) {
-            throw new RuntimeException("Something went wrong. 'Expense' was not saved");
-        }
+        // Save the expense to the repository
+        expensesRepository.save(expense);
+        month.addExpense(expense); // Assume addExpense handles the relationship correctly
         return expense;
     }
 
@@ -44,41 +38,31 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Transactional
     public boolean deleteExpense(Long id) {
         Optional<Expense> expenseToDelete = expensesRepository.findById(id);
-
         if (expenseToDelete.isEmpty()) {
-            throw new IllegalArgumentException("Expense with ID " + id + " was not found.");
+            return false; // Simply return false if the expense is not found
         }
 
-        // Proceed only if the expense is present
-        Optional<Month> associatedMonth = monthRepository.findById(expenseToDelete.get().getMonth().getId());
+        // Find the associated month and proceed with deletion if found
+        expenseToDelete.ifPresent(expense -> {
+            monthRepository.findById(expense.getMonth().getId()).ifPresent(month -> {
+                month.removeExpense(expense);
+                expensesRepository.delete(expense);
+            });
+        });
 
-        if (associatedMonth.isEmpty()) {
-            throw new IllegalArgumentException("Associated Month was not found.");
-        }
-        // At this point, both expenseToDelete and associatedMonth are present, proceed with the logic
-
-        try {
-            expensesRepository.deleteById(id);
-            associatedMonth.get().removeExpense(expenseToDelete.get());
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not delete expense with ID " + id, e);
-        }
+        return true; // Return true if the deletion process is initiated
     }
+
 
     @Override
-    public Expense findExpenseById(Long id) {
-        return expensesRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expense with ID " + id + " was not found."));
+    public Optional<Expense> findExpenseById(Long id) {
+        return expensesRepository.findById(id);
     }
+
 
     @Override
     @Transactional
     public List<Expense> findAllExpenses() {
-        List<Expense> expenses = expensesRepository.findAll();
-        if (expenses.isEmpty()) {
-            throw new RuntimeException("No expenses found");
-        }
-        return expenses;
+        return expensesRepository.findAll();
     }
 }

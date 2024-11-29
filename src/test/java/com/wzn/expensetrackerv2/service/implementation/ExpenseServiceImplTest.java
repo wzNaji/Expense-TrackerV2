@@ -192,7 +192,7 @@ class ExpenseServiceImplTest {
         when(expensesRepository.findById(expenseId)).thenReturn(Optional.of(expense));
 
         // Act
-        Expense result = expenseService.findExpenseById(expenseId);
+        Expense result = expenseService.findExpenseById(expenseId).get();
 
         // Assert
         assertNotNull(result);

@@ -5,12 +5,14 @@ import com.wzn.expensetrackerv2.entity.Month;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import com.wzn.expensetrackerv2.service.MonthService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/expense")
@@ -26,94 +28,77 @@ public class ExpenseController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createExpense(@RequestBody Expense expense, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("Access Denied: User is not authenticated.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Handle unauthenticated requests
+        }
+
+        if (expense == null || expense.getMonth() == null) {
+            System.out.println("Error: Expense and Month details are required.");
+            return ResponseEntity.badRequest().body("Expense and Month details are required."); // Basic input validation
+        }
+
+        String username = authentication.getName();
+        System.out.println("User " + username + " is creating an expense: " + expense);
+
+        Month associatedMonth = monthService.findByYearAndMonth(expense.getMonth().getYear(), expense.getMonth().getMonth());
+        if (associatedMonth == null) {
+            System.out.println("Error: Month not found for year " + expense.getMonth().getYear() + " and month " + expense.getMonth().getMonth());
+            return ResponseEntity.badRequest().body("The specified month does not exist.");
+        }
+
         try {
-            // Extract authenticated user's information
-            String username = authentication.getName();
-            System.out.println("User " + username + " is creating an expense: " + expense);
-
-            // find the month based on the id we get from client
-            int year = expense.getMonth().getYear();
-            int month = expense.getMonth().getMonth();
-
-            Month associatedMonth = monthService.findByYearAndMonth(year,month);
-            System.out.println(associatedMonth.getId());
-
-            if (associatedMonth == null) {
-                throw new RuntimeException("A Month is required to create an expense.");
-            }
-
-            // Save the Expense
-            expenseService.createExpense(associatedMonth, expense);
-            return ResponseEntity.ok(expense);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid data: " + e.getMessage());
+            Expense createdExpense = expenseService.createExpense(associatedMonth, expense);
+            return ResponseEntity.ok(createdExpense);
+        } catch (DataIntegrityViolationException e) {
+            System.out.println("Data integrity violation while saving expense: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Data integrity issue when saving the expense.");
         } catch (Exception e) {
-            System.out.println("Error creating expense: " + e.getMessage());
-            return ResponseEntity.internalServerError().body("Failed to create expense: " + e.getMessage());
+            System.out.println("Unexpected error occurred while saving expense: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("An error occurred while creating the expense.");
         }
     }
 
 
-
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteExpense(@PathVariable Long id, Authentication authentication) {
-        try {
-            // Logging user information from Authentication
-            String username = authentication.getName();
-            System.out.println("User " + username + " is deleting expense with ID: " + id);
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Handle unauthenticated requests
+        }
 
-            boolean isDeleted = expenseService.deleteExpense(id);
-            if (isDeleted) {
-                System.out.println("Expense with ID " + id + " was successfully deleted by user " + username);
+        String username = authentication.getName();
+        System.out.println("User " + username + "is attempting to delete expense with ID: " + id);
+
+        try {
+            if (expenseService.deleteExpense(id)) {
+                System.out.println("Expense with ID " + id + "was successfully deleted by user " + username);
                 return ResponseEntity.ok().body("Expense successfully deleted");
             } else {
-                System.out.println("Expense with ID " + id + " not found for deletion by user " + username);
+                System.out.println("Attempt to delete non-existing expense with ID " + id + "by user " + username);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found");
             }
-        } catch (IllegalArgumentException | EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Failed to delete expense: " + e.getMessage());
         } catch (Exception e) {
+            System.out.println("Error occurred while deleting expense with ID " + id + ": " +  e.getMessage());
             return ResponseEntity.internalServerError().body("Internal Server Error: " + e.getMessage());
         }
     }
 
     @GetMapping("/{expenseId}")
     public ResponseEntity<?> getExpenseById(@PathVariable Long expenseId, Authentication authentication) {
-        try {
-            // Logging user information from Authentication
-            String username = authentication.getName();
-            System.out.println("User " + username + " is fetching expense with ID: " + expenseId);
+        if (authentication == null || !authentication.isAuthenticated()) {
+            // If no authentication details are available
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied");
+        }
 
-            Expense expense = expenseService.findExpenseById(expenseId);
-            return ResponseEntity.ok(expense);
-        } catch (IllegalArgumentException ex) {
+        String username = authentication.getName();
+        System.out.println("User " + username + " is fetching expense with ID: " + expenseId);
+
+        Optional<Expense> expenseOpt = expenseService.findExpenseById(expenseId);
+        if (expenseOpt.isEmpty()) {
             System.out.println("Expense with ID " + expenseId + " not found.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found: " + ex.getMessage());
-        } catch (Exception ex) {
-            System.out.println("Error fetching expense: " + ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found");
         }
+        return ResponseEntity.ok(expenseOpt.get());
     }
 
-    @GetMapping("/expenseList")
-    public ResponseEntity<?> getExpenseList(Authentication authentication) {
-        try {
-            // Logging user information from Authentication
-            String username = authentication.getName();
-            System.out.println("User " + username + " is fetching the expense list.");
-
-            List<Expense> allExpenses = expenseService.findAllExpenses();
-
-            if (allExpenses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No expenses available");
-            } else {
-                return ResponseEntity.ok(allExpenses);
-            }
-        } catch (Exception e) {
-            System.out.println("Error fetching expenses: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + e.getMessage());
-        }
-    }
 }
