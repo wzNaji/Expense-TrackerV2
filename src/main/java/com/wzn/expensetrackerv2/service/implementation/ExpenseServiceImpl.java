@@ -28,11 +28,17 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional
     public Expense createExpense(Month month, Expense expense) {
-        // Save the expense to the repository
+        if (month == null) {
+            throw new IllegalArgumentException("Month cannot be null");
+        }
+        if (expense == null) {
+            throw new IllegalArgumentException("Expense cannot be null");
+        }
         expensesRepository.save(expense);
         month.addExpense(expense); // Assume addExpense handles the relationship correctly
         return expense;
     }
+
 
     @Override
     @Transactional

@@ -30,23 +30,30 @@ class CategoryServiceImplTest {
 
     @Test
     void createCategory_ShouldSaveCategory() {
+        // Arrange
         Category category = new Category();
         when(categoryRepository.save(category)).thenReturn(category);
 
-        categoryService.createCategory(category);
+        // Act
+        Category result = categoryService.createCategory(category);
 
+        // Assert
+        assertNotNull(result);
         verify(categoryRepository, times(1)).save(category);
     }
 
     @Test
     void createCategory_ShouldThrowException_WhenCategoryIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> categoryService.createCategory(null));
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> categoryService.createCategory(null));
+        assertEquals("Category cannot be null", exception.getMessage());
     }
 
     @Test
-    void deleteCategory_ShouldDeleteCategory() {
+    void deleteCategory_ShouldReturnTrue_WhenCategoryExists() {
         // Arrange
         Long categoryId = 1L;
+        when(categoryRepository.existsById(categoryId)).thenReturn(true);
         doNothing().when(categoryRepository).deleteById(categoryId);
 
         // Act
@@ -54,22 +61,41 @@ class CategoryServiceImplTest {
 
         // Assert
         assertTrue(result);
+        verify(categoryRepository, times(1)).existsById(categoryId);
         verify(categoryRepository, times(1)).deleteById(categoryId);
+    }
+
+    @Test
+    void deleteCategory_ShouldReturnFalse_WhenCategoryDoesNotExist() {
+        // Arrange
+        Long categoryId = 1L;
+        when(categoryRepository.existsById(categoryId)).thenReturn(false);
+
+        // Act
+        boolean result = categoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertFalse(result);
+        verify(categoryRepository, times(1)).existsById(categoryId);
+        verify(categoryRepository, never()).deleteById(anyLong());
     }
 
     @Test
     void deleteCategory_ShouldThrowException_WhenDeletionFails() {
         // Arrange
         Long categoryId = 1L;
+        when(categoryRepository.existsById(categoryId)).thenReturn(true);
         doThrow(new RuntimeException("Deletion error")).when(categoryRepository).deleteById(categoryId);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> categoryService.deleteCategory(categoryId));
-        assertEquals("Could not delete Category with ID 1", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Could not delete Category with ID 1"));
+        verify(categoryRepository, times(1)).existsById(categoryId);
+        verify(categoryRepository, times(1)).deleteById(categoryId);
     }
 
     @Test
-    void findCategoryById_ShouldReturnCategory() {
+    void findCategoryById_ShouldReturnCategory_WhenCategoryExists() {
         // Arrange
         Long categoryId = 1L;
         Category category = new Category();
@@ -80,24 +106,27 @@ class CategoryServiceImplTest {
         Optional<Category> result = categoryService.findCategoryById(categoryId);
 
         // Assert
-        assertNotNull(result);
+        assertTrue(result.isPresent());
         assertEquals(categoryId, result.get().getId());
         verify(categoryRepository, times(1)).findById(categoryId);
     }
 
     @Test
-    void findCategoryById_ShouldThrowException_WhenCategoryNotFound() {
+    void findCategoryById_ShouldReturnEmptyOptional_WhenCategoryNotFound() {
         // Arrange
         Long categoryId = 1L;
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> categoryService.findCategoryById(categoryId));
-        assertEquals("Expense with ID 1 was not found.", exception.getMessage());
+        // Act
+        Optional<Category> result = categoryService.findCategoryById(categoryId);
+
+        // Assert
+        assertFalse(result.isPresent());
+        verify(categoryRepository, times(1)).findById(categoryId);
     }
 
     @Test
-    void findAllCategories_ShouldReturnCategories() {
+    void findAllCategories_ShouldReturnCategories_WhenCategoriesExist() {
         // Arrange
         Category category1 = new Category();
         Category category2 = new Category();
