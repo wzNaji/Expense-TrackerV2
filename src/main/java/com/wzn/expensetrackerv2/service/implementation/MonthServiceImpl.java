@@ -1,12 +1,15 @@
 package com.wzn.expensetrackerv2.service.implementation;
 
+import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
 import com.wzn.expensetrackerv2.repository.MonthRepository;
 import com.wzn.expensetrackerv2.service.MonthService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -23,49 +26,51 @@ public class MonthServiceImpl implements MonthService {
     @Transactional
     public Month createMonth(Month month) {
         if (month == null) {
-            throw new IllegalArgumentException("'Month' was not found");
+            throw new IllegalArgumentException("Month data must not be null");
         }
-            try {
-                monthRepository.save(month);
-            } catch (Exception e) {
-                throw new RuntimeException("Something went wrong. 'Month' was not saved");
-            }
-            return month;
+        try {
+            return monthRepository.save(month);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("Failed to save the month due to integrity issues: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred while saving the month", e);
+        }
     }
 
     @Override
     @Transactional
     public boolean deleteMonth(Long id) {
-        try {
-            monthRepository.deleteById(id);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not delete Month with ID " + id, e);
+        if (!monthRepository.existsById(id)) {
+            return false; // No need to throw an exception if the month simply does not exist
         }
-    }
-
-
-    @Override
-    public Month findMonthById(Long id) {
-        return monthRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Month with ID " + id + " was not found."));
+        monthRepository.deleteById(id);
+        return true;
     }
 
     @Override
-    @Transactional
+    public Optional<Month> findMonthById(Long id) {
+        return monthRepository.findById(id); // Return Optional instead of throwing exceptions
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Month> findAllMonths() {
-        List<Month> months = monthRepository.findAll();
-        if (months.isEmpty()) {
-            throw new RuntimeException("No months found");
-        }
-        return months;
+        return monthRepository.findAll(); // No exception if no months found, just return the list
     }
 
     @Override
-    @Transactional
-    public Month findByYearAndMonth(int year,int month) {
-        Month monthToFind = null;
-        return monthToFind = monthRepository.findByYearAndMonth(year,month);
+    @Transactional(readOnly = true)
+    public Month findByYearAndMonth(int year, int month) {
+        return monthRepository.findByYearAndMonth(year, month);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Expense> getExpensesByMonth(Month month) {
+        if (month == null) {
+            throw new IllegalArgumentException("Month cannot be null");
+        }
+        return month.getListOfExpenses();
     }
 
 

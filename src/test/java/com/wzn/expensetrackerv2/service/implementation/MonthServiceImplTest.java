@@ -81,11 +81,11 @@ class MonthServiceImplTest {
         when(monthRepository.findById(monthId)).thenReturn(Optional.of(month));
 
         // Act
-        Month result = monthService.findMonthById(monthId);
+        Optional<Month> result = monthService.findMonthById(monthId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(monthId, result.getId());
+        assertEquals(monthId, result.get().getId());
         verify(monthRepository, times(1)).findById(monthId);
     }
 
