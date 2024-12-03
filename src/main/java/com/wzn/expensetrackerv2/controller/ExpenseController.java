@@ -41,14 +41,15 @@ public class ExpenseController {
         String username = authentication.getName();
         System.out.println("User " + username + " is creating an expense: " + expense);
 
-        Month associatedMonth = monthService.findByYearAndMonth(expense.getMonth().getYear(), expense.getMonth().getMonth());
-        if (associatedMonth == null) {
+        Optional<Month> associatedMonth = monthService.findMonthById(expense.getMonth().getId());
+        //Month associatedMonth = monthService.findByYearAndMonth(expense.getMonth().getYear(), expense.getMonth().getMonth());
+        if (associatedMonth.isEmpty()) {
             System.out.println("Error: Month not found for year " + expense.getMonth().getYear() + " and month " + expense.getMonth().getMonth());
             return ResponseEntity.badRequest().body("The specified month does not exist.");
         }
 
         try {
-            Expense createdExpense = expenseService.createExpense(associatedMonth, expense);
+            Expense createdExpense = expenseService.createExpense(associatedMonth.get(), expense);
             return ResponseEntity.ok(createdExpense);
         } catch (DataIntegrityViolationException e) {
             System.out.println("Data integrity violation while saving expense: " + e.getMessage());
