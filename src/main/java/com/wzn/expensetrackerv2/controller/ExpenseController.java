@@ -1,17 +1,17 @@
 package com.wzn.expensetrackerv2.controller;
 
+import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
+import com.wzn.expensetrackerv2.service.CategoryService;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import com.wzn.expensetrackerv2.service.MonthService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,31 +20,33 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final MonthService monthService;
-
-    public ExpenseController(ExpenseService expenseService, MonthService monthService) {
+    public ExpenseController(ExpenseService expenseService, MonthService monthService, CategoryService categoryService) {
         this.expenseService = expenseService;
         this.monthService = monthService;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createExpense(@RequestBody Expense expense, Authentication authentication) {
+        // auth
         if (authentication == null || !authentication.isAuthenticated()) {
             System.out.println("Access Denied: User is not authenticated.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Handle unauthenticated requests
         }
 
+        // null checks
         if (expense == null || expense.getMonth() == null) {
             System.out.println("Error: Expense and Month details are required.");
             return ResponseEntity.badRequest().body("Expense and Month details are required."); // Basic input validation
         }
 
+        // Logging
         String username = authentication.getName();
         System.out.println("User " + username + " is creating an expense: " + expense);
 
+        // find month associated with the expense so we can add the month object to the expense in the service
         Optional<Month> associatedMonth = monthService.findMonthById(expense.getMonth().getId());
-        //Month associatedMonth = monthService.findByYearAndMonth(expense.getMonth().getYear(), expense.getMonth().getMonth());
         if (associatedMonth.isEmpty()) {
-            System.out.println("Error: Month not found for year " + expense.getMonth().getYear() + " and month " + expense.getMonth().getMonth());
+            System.out.println("Error: Month not found for id: " + expense.getMonth().getId());
             return ResponseEntity.badRequest().body("The specified month does not exist.");
         }
 
