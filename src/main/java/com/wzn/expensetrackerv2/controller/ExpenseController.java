@@ -70,19 +70,23 @@ public class ExpenseController {
         }
 
         String username = authentication.getName();
-        System.out.println("User " + username + "is attempting to delete expense with ID: " + id);
+        System.out.println("User " + username + " is attempting to delete expense with ID: " + id);
 
         try {
-            if (expenseService.deleteExpense(id)) {
-                System.out.println("Expense with ID " + id + "was successfully deleted by user " + username);
-                return ResponseEntity.ok().body("Expense successfully deleted");
+            boolean result = expenseService.deleteExpense(id);
+            if (result) {
+                System.out.println("Expense with ID " + id + " was successfully deleted by user " + username);
+                // Respond with a JSON object containing the success message
+                return ResponseEntity.ok().build();
             } else {
-                System.out.println("Attempt to delete non-existing expense with ID " + id + "by user " + username);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found");
+                System.out.println("Attempt to delete non-existing expense with ID " + id + " by user " + username);
+                // Respond with a JSON object indicating the expense was not found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         } catch (Exception e) {
-            System.out.println("Error occurred while deleting expense with ID " + id + ": " +  e.getMessage());
-            return ResponseEntity.internalServerError().body("Internal Server Error: " + e.getMessage());
+            System.out.println("Error occurred while deleting expense with ID " + id + ": " + e.getMessage());
+            // Respond with a JSON object containing the error message
+            return ResponseEntity.internalServerError().build();
         }
     }
 
