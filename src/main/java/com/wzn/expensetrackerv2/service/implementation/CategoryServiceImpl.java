@@ -50,16 +50,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Optional<Category> findCategoryById(Long id) {
-        return categoryRepository.findById(id); // Use Optional to gracefully handle the absence of a category.
+        return categoryRepository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Category> findAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        if (categories.isEmpty()) {
-            throw new RuntimeException("No categories found"); // Consider returning an empty list or using Optional if appropriate.
-        }
-        return categories;
+        return categoryRepository.findAll();
     }
 }
