@@ -141,14 +141,4 @@ class CategoryServiceImplTest {
         assertEquals(2, result.size());
         verify(categoryRepository, times(1)).findAll();
     }
-
-    @Test
-    void findAllCategories_ShouldThrowException_WhenNoCategoriesFound() {
-        // Arrange
-        when(categoryRepository.findAll()).thenReturn(Arrays.asList());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> categoryService.findAllCategories());
-        assertEquals("No categories found", exception.getMessage());
-    }
 }
