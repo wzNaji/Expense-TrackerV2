@@ -3,6 +3,7 @@ package com.wzn.expensetrackerv2.service.implementation;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
 import com.wzn.expensetrackerv2.repository.MonthRepository;
+import com.wzn.expensetrackerv2.service.ExpenseService;
 import com.wzn.expensetrackerv2.service.MonthService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,11 @@ import java.util.Optional;
 public class MonthServiceImpl implements MonthService {
 
     private final MonthRepository monthRepository;
+    private final ExpenseService expenseService;
 
-    public MonthServiceImpl(MonthRepository monthRepository) {
+    public MonthServiceImpl(MonthRepository monthRepository, ExpenseService expenseService) {
         this.monthRepository = monthRepository;
+        this.expenseService = expenseService;
     }
 
 
@@ -40,11 +43,18 @@ public class MonthServiceImpl implements MonthService {
     @Override
     @Transactional
     public boolean deleteMonth(Long id) {
-        if (!monthRepository.existsById(id)) {
-            return false; // No need to throw an exception if the month simply does not exist
+        Optional<Month> monthToDelete = monthRepository.findById(id);
+        if (monthToDelete.isEmpty()) {
+            return false;
+        }
+
+        // Removes expense from month and deletes expense completely
+        List<Expense> expensesAssociatedToMoth = monthToDelete.get().getListOfExpenses();
+        for (Expense expense:expensesAssociatedToMoth) {
+            expenseService.deleteExpense(expense.getId());
         }
         monthRepository.deleteById(id);
-        return true;
+        return true; // Return true if the deletion process is initiated
     }
 
     @Override

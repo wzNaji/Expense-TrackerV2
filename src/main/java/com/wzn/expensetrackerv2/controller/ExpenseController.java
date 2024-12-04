@@ -66,7 +66,7 @@ public class ExpenseController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteExpense(@PathVariable Long id, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Handle unauthenticated requests
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         String username = authentication.getName();

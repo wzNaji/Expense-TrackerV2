@@ -35,12 +35,28 @@ public class MonthController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteMonth(@PathVariable Long id) {
-        boolean isDeleted = monthService.deleteMonth(id);
-        if (!isDeleted) {
-            return ResponseEntity.badRequest().body("Month not found");
+    public ResponseEntity<?> deleteMonth(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
         }
-        return ResponseEntity.ok().body("Month successfully deleted");
+
+            String username = authentication.getName();
+            System.out.println("User " + username + " is attempting to delete expense with ID: " + id);
+
+        try {
+            boolean result = monthService.deleteMonth(id);
+            if (result) {
+                System.out.println("Month with ID " + id + " was successfully deleted by user " + username);
+                return ResponseEntity.ok().build();
+            } else {
+                System.out.println("Attempt to delete non-existing expense with ID " + id + " by user " + username);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (Exception e) {
+            System.out.println("Error occurred while deleting expense with ID " + id + ": " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/{monthId}")
