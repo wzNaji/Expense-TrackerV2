@@ -1,7 +1,9 @@
 package com.wzn.expensetrackerv2.service.implementation;
 
+import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
+import com.wzn.expensetrackerv2.repository.CategoryRepository;
 import com.wzn.expensetrackerv2.repository.ExpensesRepository;
 import com.wzn.expensetrackerv2.repository.MonthRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,9 @@ class ExpenseServiceImplTest {
     @Mock
     private ExpensesRepository expensesRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private ExpenseServiceImpl expenseService;
 
@@ -39,20 +44,30 @@ class ExpenseServiceImplTest {
         Month month = new Month();
         month.setId(1L);
 
+        Category categoryInDB = new Category(1L, "Category");
         Expense expense = new Expense();
         expense.setPrice(100.0);
         expense.setDescription("Groceries");
+        expense.setCategory(categoryInDB);
 
-        when(expensesRepository.save(expense)).thenReturn(expense);
+        when(categoryRepository.findCategoryByName(categoryInDB.getName()))
+                .thenReturn(Optional.of(categoryInDB));
+        when(expensesRepository.save(any(Expense.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         Expense result = expenseService.createExpense(month, expense);
 
         // Assert
         assertNotNull(result, "The created expense should not be null");
+        assertEquals(expense.getPrice(), result.getPrice(), "The expense price should match");
+        assertEquals(expense.getDescription(), result.getDescription(), "The expense description should match");
+        assertEquals(expense.getCategory(), result.getCategory(), "The expense category should match");
+
         verify(expensesRepository, times(1)).save(expense);
+        verify(categoryRepository, times(1)).findCategoryByName(categoryInDB.getName());
         assertTrue(month.getListOfExpenses().contains(expense), "The expense should be associated with the month");
     }
+
 
     @Test
     void createExpense_ShouldThrowException_WhenMonthIsNull() {
