@@ -2,7 +2,9 @@ package com.wzn.expensetrackerv2.service.implementation;
 
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
+import com.wzn.expensetrackerv2.repository.ExpensesRepository;
 import com.wzn.expensetrackerv2.repository.MonthRepository;
+import com.wzn.expensetrackerv2.service.ExpenseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -21,8 +23,12 @@ class MonthServiceImplTest {
     @Mock
     private MonthRepository monthRepository;
 
+    @Mock
+    private ExpenseService expenseService;
+
     @InjectMocks
     private MonthServiceImpl monthService;
+
 
     @BeforeEach
     void setUp() {
@@ -51,19 +57,32 @@ class MonthServiceImplTest {
     }
 
     @Test
-    void deleteMonth_ShouldDeleteMonth_WhenExists() {
+    void deleteMonth_ShouldDeleteMonthAndExpenses_WhenExists() {
         // Arrange
         Long monthId = 1L;
-        when(monthRepository.existsById(monthId)).thenReturn(true);
-        doNothing().when(monthRepository).deleteById(monthId);
+        Month mockMonth = new Month();
+        Expense expense1 = new Expense();
+        expense1.setId(101L);
+        Expense expense2 = new Expense();
+        expense2.setId(102L);
+        mockMonth.setListOfExpenses(List.of(expense1, expense2));
+
+        // Mock repository and service behavior
+        when(monthRepository.findById(monthId)).thenReturn(Optional.of(mockMonth));
+        when(expenseService.deleteExpense(101L)).thenReturn(true);
+        when(expenseService.deleteExpense(102L)).thenReturn(true);
 
         // Act
         boolean result = monthService.deleteMonth(monthId);
 
         // Assert
-        assertTrue(result);
+        assertTrue(result, "Expected deleteMonth to return true when the month exists");
+        verify(expenseService, times(1)).deleteExpense(101L);
+        verify(expenseService, times(1)).deleteExpense(102L);
         verify(monthRepository, times(1)).deleteById(monthId);
+
     }
+
 
     @Test
     void deleteMonth_ShouldReturnFalse_WhenMonthDoesNotExist() {
