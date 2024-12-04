@@ -1,17 +1,17 @@
 package com.wzn.expensetrackerv2.controller;
 
+import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
+import com.wzn.expensetrackerv2.service.CategoryService;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import com.wzn.expensetrackerv2.service.MonthService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,31 +20,33 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final MonthService monthService;
-
-    public ExpenseController(ExpenseService expenseService, MonthService monthService) {
+    public ExpenseController(ExpenseService expenseService, MonthService monthService, CategoryService categoryService) {
         this.expenseService = expenseService;
         this.monthService = monthService;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createExpense(@RequestBody Expense expense, Authentication authentication) {
+        // auth
         if (authentication == null || !authentication.isAuthenticated()) {
             System.out.println("Access Denied: User is not authenticated.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Handle unauthenticated requests
         }
 
+        // null checks
         if (expense == null || expense.getMonth() == null) {
             System.out.println("Error: Expense and Month details are required.");
             return ResponseEntity.badRequest().body("Expense and Month details are required."); // Basic input validation
         }
 
+        // Logging
         String username = authentication.getName();
         System.out.println("User " + username + " is creating an expense: " + expense);
 
+        // find month associated with the expense so we can add the month object to the expense in the service
         Optional<Month> associatedMonth = monthService.findMonthById(expense.getMonth().getId());
-        //Month associatedMonth = monthService.findByYearAndMonth(expense.getMonth().getYear(), expense.getMonth().getMonth());
         if (associatedMonth.isEmpty()) {
-            System.out.println("Error: Month not found for year " + expense.getMonth().getYear() + " and month " + expense.getMonth().getMonth());
+            System.out.println("Error: Month not found for id: " + expense.getMonth().getId());
             return ResponseEntity.badRequest().body("The specified month does not exist.");
         }
 
@@ -68,19 +70,23 @@ public class ExpenseController {
         }
 
         String username = authentication.getName();
-        System.out.println("User " + username + "is attempting to delete expense with ID: " + id);
+        System.out.println("User " + username + " is attempting to delete expense with ID: " + id);
 
         try {
-            if (expenseService.deleteExpense(id)) {
-                System.out.println("Expense with ID " + id + "was successfully deleted by user " + username);
-                return ResponseEntity.ok().body("Expense successfully deleted");
+            boolean result = expenseService.deleteExpense(id);
+            if (result) {
+                System.out.println("Expense with ID " + id + " was successfully deleted by user " + username);
+                // Respond with a JSON object containing the success message
+                return ResponseEntity.ok().build();
             } else {
-                System.out.println("Attempt to delete non-existing expense with ID " + id + "by user " + username);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found");
+                System.out.println("Attempt to delete non-existing expense with ID " + id + " by user " + username);
+                // Respond with a JSON object indicating the expense was not found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         } catch (Exception e) {
-            System.out.println("Error occurred while deleting expense with ID " + id + ": " +  e.getMessage());
-            return ResponseEntity.internalServerError().body("Internal Server Error: " + e.getMessage());
+            System.out.println("Error occurred while deleting expense with ID " + id + ": " + e.getMessage());
+            // Respond with a JSON object containing the error message
+            return ResponseEntity.internalServerError().build();
         }
     }
 

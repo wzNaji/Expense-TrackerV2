@@ -1,7 +1,9 @@
 package com.wzn.expensetrackerv2.service.implementation;
 
+import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
+import com.wzn.expensetrackerv2.repository.CategoryRepository;
 import com.wzn.expensetrackerv2.repository.ExpensesRepository;
 import com.wzn.expensetrackerv2.repository.MonthRepository;
 import com.wzn.expensetrackerv2.service.ExpenseService;
@@ -18,10 +20,12 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpensesRepository expensesRepository;
     private final MonthRepository monthRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ExpenseServiceImpl(ExpensesRepository expensesRepository, MonthRepository monthRepository) {
+    public ExpenseServiceImpl(ExpensesRepository expensesRepository, MonthRepository monthRepository, CategoryRepository categoryRepository) {
         this.expensesRepository = expensesRepository;
         this.monthRepository = monthRepository;
+        this.categoryRepository = categoryRepository;
     }
 
 
@@ -34,8 +38,15 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (expense == null) {
             throw new IllegalArgumentException("Expense cannot be null");
         }
+
+        Optional<Category> category = categoryRepository.findCategoryByName(expense.getCategory().getName());
+        category.ifPresent(expense::setCategory);
+        if (category.isEmpty()) {
+            expense.setCategory(null);
+        }
+
         expensesRepository.save(expense);
-        month.addExpense(expense); // Assume addExpense handles the relationship correctly
+        month.addExpense(expense); // Bi-directional (See month entity)
         return expense;
     }
 
