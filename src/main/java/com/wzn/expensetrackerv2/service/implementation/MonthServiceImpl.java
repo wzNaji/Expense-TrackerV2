@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,18 +45,31 @@ public class MonthServiceImpl implements MonthService {
     @Transactional
     public boolean deleteMonth(Long id) {
         Optional<Month> monthToDelete = monthRepository.findById(id);
-        if (monthToDelete.isEmpty()) {
+        if (!monthToDelete.isPresent()) {
             return false;
         }
 
-        // Removes expense from month and deletes expense completely
-        List<Expense> expensesAssociatedToMoth = monthToDelete.get().getListOfExpenses();
-        for (Expense expense:expensesAssociatedToMoth) {
-            expenseService.deleteExpense(expense.getId());
+        try {
+            // Step 1: Collect all expense IDs in a separate list
+            List<Long> expenseIds = new ArrayList<>();
+            for (Expense expense : monthToDelete.get().getListOfExpenses()) {
+                expenseIds.add(expense.getId());
+            }
+
+            // Step 2: Delete expenses one by one using their IDs
+            for (Long expenseId : expenseIds) {
+                expenseService.deleteExpense(expenseId);
+            }
+            monthRepository.deleteById(id);
+            return true; // Return true if the deletion process is initiated
+        } catch (Exception e) {
+            // Log the error and possibly rethrow as a custom checked exception or handle accordingly
+            System.out.println("An error occurred while deleting the month and its expenses: " + e.getMessage());
+            e.printStackTrace();
+            return false; // Consider how you want to handle failure scenarios
         }
-        monthRepository.deleteById(id);
-        return true; // Return true if the deletion process is initiated
     }
+
 
     @Override
     public Optional<Month> findMonthById(Long id) {

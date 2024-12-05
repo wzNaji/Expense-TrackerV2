@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -34,31 +36,35 @@ public class MonthController {
         }
     }
 
+    // This is the way to send a correct json object to the frontend. Mistakes were made but we shall live to fight another day
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteMonth(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> deleteMonth(@PathVariable Long id, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Unauthorized access");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
-
-            String username = authentication.getName();
-            System.out.println("User " + username + " is attempting to delete expense with ID: " + id);
 
         try {
             boolean result = monthService.deleteMonth(id);
+            Map<String, Object> response = new HashMap<>();
             if (result) {
-                System.out.println("Month with ID " + id + " was successfully deleted by user " + username);
-                return ResponseEntity.ok().build();
+                response.put("success", true);
+                response.put("message", "Month deleted successfully.");
+                return ResponseEntity.ok(response);
             } else {
-                System.out.println("Attempt to delete non-existing expense with ID " + id + " by user " + username);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                response.put("success", false);
+                response.put("message", "Month not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (Exception e) {
-            System.out.println("Error occurred while deleting expense with ID " + id + ": " + e.getMessage());
-            return ResponseEntity.internalServerError().build();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Internal server error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
     @GetMapping("/{monthId}")
     public ResponseEntity<?> getMonthById(@PathVariable Long monthId) {
         Optional<Month> month = monthService.findMonthById(monthId);
