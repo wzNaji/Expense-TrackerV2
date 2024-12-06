@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -21,21 +23,36 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCategory(@RequestBody Category category, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> createCategory(@RequestBody Category category, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authentication failed.");
-        }
-
-        if (category == null) {
-            return ResponseEntity.badRequest().body("Category cannot be null");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Unauthorized access");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
         try {
-            Category newCategory = categoryService.createCategory(category);
-            return ResponseEntity.ok(newCategory);
+            Category result = categoryService.createCategory(category);
+            Map<String, Object> response = new HashMap<>();
+            if (result.getName() != null) {
+                response.put("success", true);
+                response.put("message", "Category created");
+                return ResponseEntity.ok(response);
+
+            } else {
+                response.put("success", false);
+                response.put("message", "Category not created");
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to create category: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Internal server error: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
         }
+
     }
 
     @DeleteMapping("/delete/{id}")
