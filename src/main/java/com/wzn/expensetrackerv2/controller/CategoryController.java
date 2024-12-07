@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/category")
@@ -55,25 +54,59 @@ public class CategoryController {
 
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
-        boolean isDeleted = categoryService.deleteCategory(id);
-        return isDeleted ? ResponseEntity.ok().body("Category successfully deleted")
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category not found");
-    }
 
-    @GetMapping("/{categoryId}")
-    public ResponseEntity<?> getCategoryById(@PathVariable Long categoryId) {
-        Optional<Category> category = categoryService.findCategoryById(categoryId);
-        return category.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCategory(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Unauthorized access");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+
+        try {
+            boolean result = categoryService.deleteCategory(id);
+            Map<String, Object> response = new HashMap<>();
+            if (result) {
+                response.put("success", true);
+                response.put("message", "Category deleted successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Category not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Internal server error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/categoryList")
-    public ResponseEntity<?> getCategoryList() {
-        List<Category> allCategories = categoryService.findAllCategories();
-        return allCategories.isEmpty() ?
-                ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-                : ResponseEntity.ok(allCategories);
+    public ResponseEntity<Map<String, Object>> getCategoryList() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Category> allCategories = categoryService.findAllCategories();
+            response.put("categories", allCategories);  // Always include the list, empty or not
+
+            if (allCategories.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "No categories found");
+                // Still returns OK status but with an empty list
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", true);
+                response.put("message", "Categories retrieved successfully");
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Internal server error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
+
+
 }
