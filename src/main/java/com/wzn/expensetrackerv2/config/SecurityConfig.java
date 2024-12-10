@@ -70,7 +70,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5500")); // Allow your specific origin
+        configuration.setAllowedOrigins(Collections.singletonList("http://127.0.0.1:5500")); // Allow your specific origin
         configuration.setAllowedMethods(Collections.singletonList("*")); // Allow any HTTP methods
         configuration.setAllowedHeaders(Collections.singletonList("*")); // Allow any headers
         configuration.setExposedHeaders(List.of("Authorization")); // Expose the Authorization header
