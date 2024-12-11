@@ -99,6 +99,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Webclient-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
