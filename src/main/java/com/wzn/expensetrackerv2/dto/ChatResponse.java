@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
         "usage"
 })
 @Data
+@Component
 @NoArgsConstructor
 public class ChatResponse { // Modtage og håndtere data fra JSON-response fra OpenAI API kald.
 
