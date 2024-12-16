@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-// TODO: Perhapsss an update expenses?
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -56,7 +55,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     public boolean deleteExpense(Long id) {
         Optional<Expense> expenseToDelete = expensesRepository.findById(id);
         if (expenseToDelete.isEmpty()) {
-            return false; // Simply return false if the expense is not found
+            return false;
         }
 
         // Find the associated month and proceed with deletion if found

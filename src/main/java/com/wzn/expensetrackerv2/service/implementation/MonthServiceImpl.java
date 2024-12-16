@@ -63,10 +63,8 @@ public class MonthServiceImpl implements MonthService {
             monthRepository.deleteById(id);
             return true; // Return true if the deletion process is initiated
         } catch (Exception e) {
-            // Log the error and possibly rethrow as a custom checked exception or handle accordingly
             System.out.println("An error occurred while deleting the month and its expenses: " + e.getMessage());
-            e.printStackTrace();
-            return false; // Consider how you want to handle failure scenarios
+            return false;
         }
     }
 

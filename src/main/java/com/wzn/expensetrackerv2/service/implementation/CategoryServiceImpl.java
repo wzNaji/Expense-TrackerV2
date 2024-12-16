@@ -38,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public boolean deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            return false; // Instead of throwing an exception, return false indicating failure to find the category.
+            return false;
         }
         try {
             categoryRepository.deleteById(id);
@@ -57,11 +57,5 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(readOnly = true)
     public List<Category> findAllCategories() {
         return categoryRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Category> findCategoryByName(String name) {
-        return categoryRepository.findCategoryByName(name);
     }
 }

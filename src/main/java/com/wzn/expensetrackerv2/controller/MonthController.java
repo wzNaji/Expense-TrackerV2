@@ -36,7 +36,6 @@ public class MonthController {
         }
     }
 
-    // This is the way to send a correct json object to the frontend. Mistakes were made but we shall live to fight another day
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Map<String, Object>> deleteMonth(@PathVariable Long id, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

@@ -1,9 +1,7 @@
 package com.wzn.expensetrackerv2.controller;
 
-import com.wzn.expensetrackerv2.entity.Category;
 import com.wzn.expensetrackerv2.entity.Expense;
 import com.wzn.expensetrackerv2.entity.Month;
-import com.wzn.expensetrackerv2.service.CategoryService;
 import com.wzn.expensetrackerv2.service.ExpenseService;
 import com.wzn.expensetrackerv2.service.MonthService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,7 +18,7 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final MonthService monthService;
-    public ExpenseController(ExpenseService expenseService, MonthService monthService, CategoryService categoryService) {
+    public ExpenseController(ExpenseService expenseService, MonthService monthService) {
         this.expenseService = expenseService;
         this.monthService = monthService;
     }
