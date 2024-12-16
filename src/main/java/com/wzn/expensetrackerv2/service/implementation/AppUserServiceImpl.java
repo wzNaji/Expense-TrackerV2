@@ -18,8 +18,8 @@ public class AppUserServiceImpl implements UserDetailsService {
         // Initialize the user if not present.
         if (appUserRepository.count() == 0) {
             AppUser appUser = new AppUser();
-            appUser.setUsername(System.getenv("USERNAMEAZURE"));
-            appUser.setPassword(new BCryptPasswordEncoder().encode(System.getenv("USERPWDAZURE")));
+            appUser.setUsername(System.getenv("USERNAME"));
+            appUser.setPassword(new BCryptPasswordEncoder().encode(System.getenv("USERPWD")));
             appUserRepository.save(appUser);
         }
     }
