@@ -11,10 +11,10 @@ public class WebClientConfig implements WebMvcConfigurer {
 
     @Bean
     public WebClient webClient() {
-        String reducedKey = System.getenv("ExpenseTrackerKey");
+        String openAIKey = System.getenv("ExpenseTrackerKey");
         return WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
-                .defaultHeader("Authorization", "Bearer " + reducedKey)
+                .defaultHeader("Authorization", "Bearer " + openAIKey)
                 .build();
     }
 }
