@@ -1,0 +1,40 @@
+Database setup:
+
+CREATE DATABASE expence_tracker;
+
+CREATE TABLE `categories` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKt8o6pivur7nn124jehx7cygw5` (`name`)
+)
+
+CREATE TABLE `months` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `month` int NOT NULL,
+  `year` int NOT NULL,
+  PRIMARY KEY (`id`)
+)
+
+CREATE TABLE `user` (
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`username`)
+)
+
+CREATE TABLE `expenses` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `date` date DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `item_name` varchar(255) DEFAULT NULL,
+  `price` double NOT NULL,
+  `category_id` bigint DEFAULT NULL,
+  `month_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKqn531irs57wuj81j1ckwfwau6` (`month_id`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `FK_expenses_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
+  CONSTRAINT `FKqn531irs57wuj81j1ckwfwau6` FOREIGN KEY (`month_id`) REFERENCES `months` (`id`)
+)
+
+
